@@ -14,6 +14,18 @@
 
 ## 启动
 
+### 桌面一键启动
+
+桌面上的“听见 · TOEFL 精听”快捷方式会自动启动网页和本地转写服务，并以独立应用窗口打开。无需手动输入本地地址。
+
+如果需要重新创建桌面快捷方式，运行：
+
+```powershell
+.\install-desktop-shortcut.ps1
+```
+
+### 命令行启动
+
 项目默认使用 Codex 桌面自带的 Node.js 和 Python 运行时。在 PowerShell 中运行：
 
 ```powershell
