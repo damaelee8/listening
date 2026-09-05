@@ -1,0 +1,13 @@
+node_modules
+.venv
+__pycache__
+*.pyc
+.tmp
+.vinext
+.next
+dist
+.wrangler
+.env*
+!.env.example
+*.log
+*.tsbuildinfo
