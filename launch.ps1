@@ -8,6 +8,14 @@ $venvPython = Join-Path $projectRoot '.venv\Scripts\python.exe'
 $transcriberRoot = Join-Path $projectRoot 'transcriber'
 $appUrl = 'http://localhost:3000/'
 $healthUrl = 'http://127.0.0.1:8765/health'
+$logDirectory = Join-Path $projectRoot '.logs'
+$logPath = Join-Path $logDirectory 'launcher.log'
+
+New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
+
+function Write-LaunchLog([string]$message) {
+  Add-Content -LiteralPath $logPath -Value ("[{0}] {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $message)
+}
 
 function Test-ListeningService([string]$url) {
   try {
@@ -25,11 +33,13 @@ function Show-LaunchError([string]$message) {
 }
 
 try {
+  Write-LaunchLog 'Launcher started.'
   if (-not (Test-Path $venvPython) -or -not (Test-Path (Join-Path $projectRoot 'node_modules'))) {
     throw '运行环境尚未安装。请先在项目文件夹运行 .\start.ps1 -Install。'
   }
 
   if (-not (Test-ListeningService $healthUrl)) {
+    Write-LaunchLog 'Starting transcription service.'
     Start-Process -FilePath $venvPython `
       -ArgumentList '-m', 'uvicorn', 'app:app', '--host', '127.0.0.1', '--port', '8765' `
       -WorkingDirectory $transcriberRoot `
@@ -37,6 +47,7 @@ try {
   }
 
   if (-not (Test-ListeningService $appUrl)) {
+    Write-LaunchLog 'Starting web service.'
     $env:Path = "$nodePath;$env:Path"
     Start-Process -FilePath $pnpmPath `
       -ArgumentList 'run', 'dev' `
@@ -64,13 +75,17 @@ try {
   $edgePath = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 
   if ($edgePath) {
-    Start-Process -FilePath $edgePath -ArgumentList "--app=$appUrl", '--start-maximized'
+    Write-LaunchLog "Opening app window with Edge: $edgePath"
+    Start-Process -FilePath $edgePath -ArgumentList @('--new-window', "--app=$appUrl", '--start-maximized', '--no-first-run') -WindowStyle Normal
   }
   else {
-    Start-Process $appUrl
+    Write-LaunchLog 'Edge not found; opening the default browser.'
+    Start-Process -FilePath $appUrl
   }
+  Write-LaunchLog 'Launcher completed.'
 }
 catch {
+  Write-LaunchLog ("Launcher failed: {0}" -f $_.Exception.Message)
   Show-LaunchError $_.Exception.Message
   exit 1
 }
