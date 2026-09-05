@@ -1,4 +1,4 @@
-# 听见 · TOEFL Listening Lab
+# listening — 听见 · TOEFL Listening Lab
 
 一个面向个人使用的托福听力精听网页应用。导入音频后，本地 Whisper 服务会自动转写、断句并生成时间戳，网页端提供单句循环、听写对照、错误标签、错句复习和训练统计。
 
